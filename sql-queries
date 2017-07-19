@@ -1,1 +1,89 @@
-/*We will do our queries in this file!
+/*We will do our queries in this file!*/
+
+/* --  Birth Year -- */
+Select name, year
+From movies
+Where year = 1992;
+
+Select count(*)
+From movies
+Where year = 1992;
+
+Select count(*)
+From movies
+Where year = 1959;
+
+/* --  1982 -- */
+Select count(*)
+From movies
+Where year = 1982;
+
+/* --  Stack -- */
+Select first_name, last_name
+From actors
+Where last_name Like '%stack%' ;
+
+/* --  Fame First -- */
+Select first_name, count(first_name)
+From actors
+Group by first_name
+Order by count(first_name);
+
+/* --  Fame Last -- */
+Select last_name, count(last_name)
+From actors
+Group by last_name
+Order by count(last_name) desc
+Limit 10;
+
+/* --  Needs something for fullname -- */
+
+/* --  Prolific -- */
+Select a.first_name, a.last_name, count(r.actor_id) Roles
+From roles r
+Left Join actors a
+On a.id = r.actor_id
+Group by r.actor_id
+Order by count(r.actor_id) desc
+Limit 100;
+
+/* --  Bottom of the Barrel -- */
+Select genre,count(genre)
+From movies_genres
+inner join movies
+on movies.id = movies_genres.movie_id
+Group by genre
+Order by count(genre);
+
+/* --  Braveheart -- */
+Select a.first_name, a.last_name
+From actors a
+left join roles r
+on a.id = r.actor_id
+where r.movie_id in
+(
+select id
+from movies
+where name = 'Braveheart' and year =1995)
+Order by a.last_name;
+
+/* --  Leap Noir -- */
+/* --  Not Working Yet -- */
+Select d.first_name, d.last_name, m.name, m.year
+From director d
+inner join directors_genres dg
+where dg.genre ='Film-Noir'
+on d.id = dg.director_id
+inner join movies_genres mg
+on mg.genre = dg.genre
+inner join movies m
+on mg.movie_id = m.id
+having m.year%4=0
+Order by m.name;
+
+
+
+
+
+
+
