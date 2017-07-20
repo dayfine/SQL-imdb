@@ -134,9 +134,24 @@ having count(distinct r.role)>=5
 order by r.movie_id;
 
 /* --  Female -- */
+select t.year, count(*) as femaleOnly
+from (
+  select m.name, m.year
+  from actors a join roles r
+  on r.actor_id = a.id join movies m
+  on m.id=r.movie_id
+  where a.gender = 'F'
+  group by m.year, m.id
 
+  except
 
-
-
+  select m.name, m.year
+  from actors a join roles r
+  on r.actor_id = a.id join movies m
+  on m.id=r.movie_id
+  where a.gender = 'M'
+  group by m.year, m.id
+) t
+group by t.year;
 
 
