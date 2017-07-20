@@ -106,6 +106,21 @@ and r.movie_id in
 order by m.name
 limit 50;
 
+/* --  Bacon : Refacotred -- */
+Select a.first_name, a.last_name, m.name
+from roles r join
+(
+  Select movie_id from roles join actors
+  on roles.actor_id=actors.id
+  where actors.first_name = 'Kevin' and actors.last_name = 'Bacon'
+) as kevins_movies
+on kevins_movies.movie_id = r.movie_id join actors a
+on r.actor_id = a.id join movies m
+on m.id=kevins_movies.movie_id join movies_genres mg
+on mg.movie_id = m.id
+where mg.genre = 'Drama'
+and not (a.first_name = 'Kevin' and a.last_name = 'Bacon');
+
 /* --  Immortal Actor -- */
 Select a.id, a.first_name, a.last_name
 from actors a join roles r
@@ -123,6 +138,23 @@ and a.id in
 group by a.id
 limit 50;
 
+/* --  Immortal Actor : Refacotred -- */
+select id, first_name, last_name
+from actors join
+(Select actor_id
+from roles r join movies m
+on r.movie_id=m.id and m.year > 2000
+) as t2000
+intersect
+(
+  Select actor_id
+  from roles r1 join movies m1
+  on r1.movie_id=m1.id and m1.year < 1900
+) as t1900
+on id = t1900.actor_id
+group by id
+limit 50;
+
 /* --  Busy Filming -- */
 select a.first_name, a.last_name, m.name, m.year, count(distinct r.role)
 from roles r join actors a
@@ -134,24 +166,25 @@ having count(distinct r.role)>=5
 order by r.movie_id;
 
 /* --  Female -- */
-select t.year, count(*) as femaleOnly
-from (
-  select m.name, m.year
+select year, count(*) as femaleOnly
+from movies join
+(
+  select movie_id
   from actors a join roles r
-  on r.actor_id = a.id join movies m
-  on m.id=r.movie_id
-  where a.gender = 'F'
-  group by m.year, m.id
+  on r.actor_id = a.id and a.gender = 'F'
 
   except
 
-  select m.name, m.year
+  select movie_id
   from actors a join roles r
-  on r.actor_id = a.id join movies m
-  on m.id=r.movie_id
-  where a.gender = 'M'
-  group by m.year, m.id
-) t
-group by t.year;
+  on r.actor_id = a.id and a.gender = 'M'
+) as t
+on t.movie_id = movies.id
+group by year;
+
+
+
+
+
 
 
