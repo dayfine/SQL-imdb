@@ -37,6 +37,14 @@ Order by count(last_name) desc
 Limit 10;
 
 /* --  Needs something for fullname -- */
+Select full_name, count(full_name)
+From (
+  Select first_name || ' ' || last_name as full_name
+  From actors
+    )
+Group by full_name
+Order by count(full_name) desc
+Limit 10;
 
 /* --  Prolific -- */
 Select a.first_name, a.last_name, count(r.actor_id) Roles
@@ -62,25 +70,70 @@ left join roles r
 on a.id = r.actor_id
 where r.movie_id in
 (
-select id
-from movies
-where name = 'Braveheart' and year =1995)
+  select id
+  from movies
+  where name = 'Braveheart' and year =1995
+)
 Order by a.last_name;
 
 /* --  Leap Noir -- */
-/* --  Not Working Yet -- */
 Select d.first_name, d.last_name, m.name, m.year
-From director d
-inner join directors_genres dg
-where dg.genre ='Film-Noir'
-on d.id = dg.director_id
-inner join movies_genres mg
-on mg.genre = dg.genre
-inner join movies m
-on mg.movie_id = m.id
-having m.year%4=0
-Order by m.name;
+from movies m join movies_directors md
+on md.movie_id = m.id join directors d
+on d.id = md.director_id
+where m.year%4=0 and m.id in
+(
+  select mg.movie_id
+  from movies_genres mg
+  where mg.genre ='Film-Noir'
+)
+order by m.name;
 
+/* --  Bacon -- */
+Select a.first_name, a.last_name, m.name
+from actors a join roles r
+on a.id=r.actor_id join movies m
+on m.id=r.movie_id join movies_genres mg
+on mg.movie_id = r.movie_id
+where not (a.first_name = 'Kevin' and a.last_name = 'Bacon')
+and mg.genre = 'Drama'
+and r.movie_id in
+(
+  Select movie_id from roles join actors
+  on roles.actor_id=actors.id
+  where actors.first_name = 'Kevin' and actors.last_name = 'Bacon'
+)
+order by m.name
+limit 50;
+
+/* --  Immortal Actor -- */
+Select a.id, a.first_name, a.last_name
+from actors a join roles r
+on a.id=r.actor_id join movies m
+on r.movie_id=m.id
+where m.year > 2000
+and a.id in
+(
+  Select a1.id
+  from actors a1 join roles r1
+  on a1.id=r1.actor_id join movies m1
+  on r1.movie_id=m1.id
+  where m1.year < 1900
+)
+group by a.id
+limit 50;
+
+/* --  Busy Filming -- */
+select a.first_name, a.last_name, m.name, m.year, count(distinct r.role)
+from roles r join actors a
+on a.id=r.actor_id join movies m
+on r.movie_id=m.id
+where m.year >1990
+group by r.movie_id, a.id
+having count(distinct r.role)>=5
+order by r.movie_id;
+
+/* --  Female -- */
 
 
 
