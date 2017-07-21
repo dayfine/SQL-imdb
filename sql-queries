@@ -141,19 +141,29 @@ limit 50;
 /* --  Immortal Actor : Refacotred -- */
 select id, first_name, last_name
 from actors join
-(Select actor_id
-from roles r join movies m
-on r.movie_id=m.id and m.year > 2000
-) as t2000
-intersect
 (
-  Select actor_id
-  from roles r1 join movies m1
-  on r1.movie_id=m1.id and m1.year < 1900
-) as t1900
-on id = t1900.actor_id
-group by id
-limit 50;
+  Select * from
+  (
+    select actor_id
+    from movies  join roles
+    on id = roles.movie_id
+    where year > 2000
+  )  m2000
+
+  join
+
+  (
+    select actor_id
+    from movies join roles
+    on id = roles.movie_id
+    where year <1900
+  )  m1900
+
+  on m2000.actor_id = m1900.actor_id
+
+) t
+on id = t.actor_id
+group by id;
 
 /* --  Busy Filming -- */
 select a.first_name, a.last_name, m.name, m.year, count(distinct r.role)
